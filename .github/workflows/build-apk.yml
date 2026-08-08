@@ -22,7 +22,7 @@ jobs:
           java-version: '17'
 
       - name: Build APK (buildozer)
-        uses: Kivy/buildozer-action@v1
+        uses: ArtemSBulgakov/buildozer-action@v1
         with:
           python-version: '3.11'
           buildozer-cmd: buildozer android debug
