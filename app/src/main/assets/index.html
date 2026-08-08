@@ -198,17 +198,28 @@ function up(files){
     (async function(){
       try{
         var p=await j('/storage/presigned-url',{body:{fileType:'s3',fileName:f.name,fileSize:f.size,contentType:'application/octet-stream',accessLevel:'PUBLIC'}});
+        var t0=Date.now(); // PUT 传输计时起点（presign 之后，不含解码/签发耗时）
         await new Promise(function(res,rej){
           var x=new XMLHttpRequest();x.open('PUT',p.data.presignedUrl);
-          x.upload.onprogress=function(e){if(e.lengthComputable){var pct=Math.round(e.loaded/e.total*100);fill.style.width=pct+'%';pc.textContent=pct+'%'}};
+          x.upload.onprogress=function(e){
+            if(e.lengthComputable){
+              var pct=Math.round(e.loaded/e.total*100);
+              var el2=Date.now()-t0;
+              var spd=el2>0?(e.loaded/1048576)/(el2/1000):0;
+              fill.style.width=pct+'%';
+              pc.textContent=pct+'% '+spd.toFixed(1)+'M/s';
+            }
+          };
           x.onload=function(){x.status<200||x.status>=300?rej(new Error('R2 '+x.status)):res()};
           x.onerror=function(){rej(new Error('网络错误'))};
           x.send(f);
         });
+        var dt=(Date.now()-t0)/1000;
+        var spd=dt>0?(f.size/1048576)/dt:0;
         var u=p.data.fileUrl||p.data.url||'';
         IDX[p.data.filePath]={file:f.name,url:u,size:f.size,time:Date.now()/1000};
         idxSave();
-        fill.style.width='100%';pc.textContent='✓ 完成';
+        fill.style.width='100%';pc.textContent='✓ '+spd.toFixed(1)+'M/s';
       }catch(e){
         fill.style.background='#ff2d95';pc.textContent='✗ '+String(e.message||e).slice(0,18);
       }
