@@ -235,13 +235,28 @@ public class MainActivity extends Activity {
                         if (cdnUrl == null) { cb(callback, "{\"error\":\"not found\"}"); return; }
                         byte[] data = httpBytes(cdnUrl);
                         String name = filePath.contains("/") ? filePath.substring(filePath.lastIndexOf('/') + 1) : filePath;
-                        File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-                        if (!dir.exists()) dir.mkdirs();
-                        File f = new File(dir, name);
-                        FileOutputStream fos = new FileOutputStream(f);
-                        fos.write(data);
-                        fos.close();
-                        cb(callback, "{\"saved\":\"" + esc(f.getAbsolutePath()) + "\",\"size\":" + data.length + "}");
+                        String saved;
+                        if (android.os.Build.VERSION.SDK_INT >= 29) {
+                            android.content.ContentValues v = new android.content.ContentValues();
+                            v.put(android.provider.MediaStore.Downloads.DISPLAY_NAME, name);
+                            v.put(android.provider.MediaStore.Downloads.MIME_TYPE, "application/octet-stream");
+                            v.put(android.provider.MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/ugirlcdn");
+                            Uri uri = getContentResolver().insert(android.provider.MediaStore.Downloads.EXTERNAL_CONTENT_URI, v);
+                            if (uri == null) { cb(callback, "{\"error\":\"media insert failed\"}"); return; }
+                            java.io.OutputStream os = getContentResolver().openOutputStream(uri);
+                            os.write(data);
+                            os.close();
+                            saved = "Download/ugirlcdn/" + name;
+                        } else {
+                            File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+                            if (!dir.exists()) dir.mkdirs();
+                            File f = new File(dir, name);
+                            FileOutputStream fos = new FileOutputStream(f);
+                            fos.write(data);
+                            fos.close();
+                            saved = f.getAbsolutePath();
+                        }
+                        cb(callback, "{\"saved\":\"" + esc(saved) + "\",\"size\":" + data.length + "}");
                     } catch (Exception e) {
                         cb(callback, "{\"error\":\"" + esc(e.getMessage()) + "\"}");
                     }
