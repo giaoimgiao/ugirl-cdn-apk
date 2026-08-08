@@ -105,8 +105,20 @@ input:focus{border-color:#00e5ff}
     <h2>☕ 赞助我们</h2>
     <div class="msg"><b>公益免费 · 不限速云存储</b><br>如果喜欢的话，就赞助一下吧 ❤</div>
     <img src="sponsor_qr.png" alt="赞助码" onclick="openAlipay()">
-    <div class="tip">👆 长按/点击二维码 · 或点击下方按钮打开支付宝</div>
+    <div class="tip">👆 点击二维码 · 或点击下方按钮打开支付宝</div>
     <button class="pb g" onclick="openAlipay()" style="width:100%">💰 打开支付宝赞助</button>
+    <div style="margin-top:14px">
+      <button class="pb sm d" id="whyBtn" style="width:100%">📖 了解存储原理 ▾</button>
+      <div id="whyBox" style="display:none;text-align:left;margin-top:12px;background:#0f0e17;border:2px solid #2d2f45;padding:12px;font-size:12px;line-height:2;color:#8b8fa8">
+        <b style="color:#00e5ff">为什么免费 & 不限速？</b><br>
+        ① 文件<b style="color:#00e5ff">不经过我们的服务器</b>：上传时签发一次性直传凭证，文件直接写入全球 CDN 边缘节点（200+ 节点）<br>
+        ② 下载自动走<b style="color:#ffd500">离你最近的节点</b>，不限速、不排队<br>
+        ③ 服务器只做"签发凭证"，<b style="color:#00e676">不存文件、不耗带宽</b>，成本≈0 → 可持续免费<br>
+        ④ 每容器免费 <b style="color:#ffd500">30 天</b>，到期自动轮换，已分享链接<b style="color:#00e676">永久有效</b><br>
+        ⑤ 容器隔离 + 路径随机不可枚举，<b style="color:#00e5ff">只有你能管理自己的文件</b><br>
+        ⑥ 赞助纯自愿，仅用于维持服务运转 ❤
+      </div>
+    </div>
   </div>
 </div>
 <script>
@@ -234,5 +246,6 @@ function closeSponsor(){$('sponsorModal').classList.remove('show')}
 function openAlipay(){nativeApi.openBrowser('https://qr.alipay.com/fkx14591ue6tjaa6zhwaa7c')}
 $('sponsorBtn').onclick=function(){$('sponsorModal').classList.add('show')};
 $('sponsorModal').onclick=function(e){if(e.target===this)closeSponsor()};
+$('whyBtn').onclick=function(){var b=$('whyBox');var show=b.style.display==='none';b.style.display=show?'block':'none';this.textContent=show?'📖 收起原理 ▴':'📖 了解存储原理 ▾'};
 autoInit();
 </script></body></html>
