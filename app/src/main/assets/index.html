@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>UGIRL CDN</title>
+<title>cdn存储</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#0f0e17;color:#e0e0e0;font-family:'Courier New',monospace;min-height:100vh;
@@ -9,19 +9,21 @@ body{background:#0f0e17;color:#e0e0e0;font-family:'Courier New',monospace;min-he
 header{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:#15162b;border-bottom:2px solid #00e5ff;position:sticky;top:0;z-index:9}
 header .lg{font-size:16px;color:#00e5ff;letter-spacing:2px;font-weight:bold}
 header .lg span{color:#ff2d95}
-header .st{font-size:12px;color:#8b8fa8;letter-spacing:1px}
+header .st{font-size:12px;color:#8b8fa8;letter-spacing:1px;display:flex;align-items:center;gap:8px}
 header .st b{color:#00e676}
+.avatar{width:26px;height:26px;background:#ffd500;color:#0f0e17;display:inline-flex;align-items:center;justify-content:center;font-size:14px;border:2px solid #0f0e17;box-shadow:2px 2px 0 #00e5ff}
 .wrap{max-width:900px;margin:0 auto;padding:24px 16px 60px;width:100%}
 .card{background:#15162b;border:2px solid #2d2f45;padding:18px;margin-bottom:18px;position:relative}
 .card::before{content:'';position:absolute;top:-2px;left:-2px;width:14px;height:14px;background:#ff2d95}
 .card h3{font-size:14px;color:#00e5ff;letter-spacing:2px;margin-bottom:14px}
 .hint{font-size:11px;color:#8b8fa8;margin-top:10px;line-height:1.8}
-input[type=text],input[type=password]{width:100%;padding:10px 12px;background:#0f0e17;border:2px solid #2d2f45;color:#e0e0e0;font-family:'Courier New',monospace;font-size:13px;margin-bottom:10px;outline:none}
+input[type=text]{width:100%;padding:10px 12px;background:#0f0e17;border:2px solid #2d2f45;color:#e0e0e0;font-family:'Courier New',monospace;font-size:13px;margin-bottom:10px;outline:none}
 input:focus{border-color:#00e5ff}
 .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .pb{font-family:'Courier New',monospace;font-size:13px;letter-spacing:1px;padding:8px 16px;background:#00e5ff;color:#0f0e17;border:2px solid #0f0e17;box-shadow:4px 4px 0 #0f0e17;cursor:pointer;margin:4px}
 .pb:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #0f0e17}
 .pb.g{background:#00e676}.pb.y{background:#ffd500}.pb.d{background:#2d2f45;color:#00e5ff}
+.pb.sm{padding:5px 10px;font-size:12px;box-shadow:2px 2px 0 #0f0e17}
 .drop{border:3px dashed #2d2f45;padding:30px 20px;text-align:center;color:#8b8fa8;cursor:pointer;background:#0f0e17}
 .drop.over{border-color:#00e5ff;color:#00e5ff}
 #qwrap{display:none;margin-top:14px}
@@ -43,22 +45,28 @@ input:focus{border-color:#00e5ff}
 .mbtn{font-family:'Courier New',monospace;font-size:11px;padding:4px 10px;border:1px solid #2d2f45;cursor:pointer;color:#0f0e17;background:#00e5ff}
 .mbtn.dl{background:#ffd500}.mbtn.del{background:#ff2d95}.mbtn.cp{background:#00e676}
 .res{display:flex;align-items:center;gap:8px;padding:7px 4px;border-bottom:1px dashed #23243a;font-size:11px}
-.res .rt{color:#00e5ff;background:#1a1b33;ppadding:2px 6px;border:1px solid #2d2f45;white-space:nowrap}
+.res .rt{color:#00e5ff;background:#1a1b33;padding:2px 6px;border:1px solid #2d2f45;white-space:nowrap}
 .res .ru{flex:1;color:#8b8fa8;word-break:break-all;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#00e676;color:#0f0e17;padding:10px 26px;font-size:13px;display:none;z-index:99;border:2px solid #0f0e17;box-shadow:4px 4px 0 #0f0e17}
 .toast.err{background:#ff2d95;color:#fff}
 .empty{color:#565a75;font-size:12px;text-align:center;padding:20px}
 </style></head><body>
-<header><div class="lg">UGIRL<span>CDN</span> ▸ 安卓版</div><div class="st">容器: <b id="curSt">未连接</b></div></header>
+<header>
+  <div class="lg">UGIRL<span>CDN</span> ▸ 存储</div>
+  <div class="st">
+    <span class="avatar" id="ava">?</span>
+    <span id="cidTxt">初始化</span>
+    <span id="expTxt" style="font-size:10px;color:#565a75"></span>
+    <button class="pb sm d" id="swapBtn">换</button>
+  </div>
+</header>
 <div class="wrap">
-  <div class="card" id="connCard">
-    <h3>连接容器</h3>
+  <div class="card" id="connCard" style="display:none">
+    <h3>手动连接</h3>
     <div class="row">
-      <button class="pb g" id="regBtn">🆕 一键开新容器</button>
-      <input type="text" id="tok" placeholder="或粘贴 ugirl token" style="flex:1;min-width:160px">
+      <input type="text" id="tok" placeholder="粘贴 ugirl token" style="flex:1;min-width:160px">
       <button class="pb" id="connBtn">连接</button>
     </div>
-    <div class="hint">每个账号 = 独立容器。请求从本机 IP 直发，互不影响。</div>
   </div>
   <div class="card">
     <h3>上传文件</h3>
@@ -82,7 +90,9 @@ input:focus{border-color:#00e5ff}
 </div>
 <div class="toast" id="toast"></div>
 <script>
-var TOK=localStorage.getItem('ug_tok')||'', IDX=idxLoad(), PARSED=[], __seq=0;
+var TOK=localStorage.getItem('ug_tok')||'', CID=localStorage.getItem('ug_cid')||'';
+var TOKT=parseInt(localStorage.getItem('ug_tok_time')||'0');
+var IDX=idxLoad(), PARSED=[], __seq=0;
 var $=function(id){return document.getElementById(id)};
 function toast(m,e){var t=$('toast');t.textContent=m;t.className='toast'+(e?' err':'');t.style.display='block';clearTimeout(t._t);t._t=setTimeout(function(){t.style.display='none'},2800)}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'"')}
@@ -103,7 +113,28 @@ function j(path,opt){
     nativeApi.post(path, typeof body==='string'?body:JSON.stringify(body), token, method, cb);
   });
 }
-function connected(){$('curSt').textContent='已连接';$('connCard').style.display='none';render()}
+function connected(){
+  $('cidTxt').textContent='容器 #'+CID;
+  $('ava').textContent=CID.charAt(0).toUpperCase();
+  var left=Math.ceil((TOKT+30*86400000-Date.now())/86400000);
+  $('expTxt').textContent='剩 '+left+' 天';
+  render();
+}
+function createNew(silent){
+  if(!silent)toast('创建容器中...');
+  j('/auth/register',{body:{email:'cdn'+Date.now()+'@outlook.com',password:'Cdnu@'+Math.random().toString(36).slice(2,10),nickname:'cdn_user'}}).then(function(d){
+    TOK=(typeof d.token==='string')?d.token:(d.token&&d.token.accessToken)||'';
+    CID=(d.profile&&d.profile.id)||'new'+Date.now().toString(36);
+    TOKT=Date.now();
+    localStorage.setItem('ug_tok',TOK);localStorage.setItem('ug_tok_time',String(TOKT));localStorage.setItem('ug_cid',CID);
+    connected();
+    if(!silent)toast('✅ 新容器 #'+CID);
+  }).catch(function(e){toast('容器创建失败: '+e.message,1)});
+}
+function autoInit(){
+  var needNew=!TOK||!CID||!TOKT||(Date.now()-TOKT>29*86400000);
+  if(needNew)createNew(true);else connected();
+}
 function render(){
   var arr=Object.keys(IDX).map(function(fp){var v=IDX[fp];v.fp=fp;return v}).sort(function(a,b){return b.time-a.time});
   $('fcount').textContent=arr.length;
@@ -118,13 +149,10 @@ function render(){
 function copyU(fp){navigator.clipboard.writeText(IDX[fp].url).then(function(){toast('✅ 已复制')},function(){toast(IDX[fp].url)})}
 function dlF(fp){toast('下载中...');nativeApi.download(fp,TOK,'__dlcb');window.__dlcb=function(res){try{var d=JSON.parse(res);d.saved?toast('✅ 已保存: '+d.saved.split('/').pop()):toast(d.error,1)}catch(e){toast(res,1)}}}
 function delF(fp){if(!confirm('删除 '+fp+' ?'))return;j('/storage/file',{body:{filePath:fp},method:'DELETE'}).then(function(){delete IDX[fp];idxSave();toast('🗑 已删除');render()}).catch(function(e){toast(e.message,1)})}
-$('regBtn').onclick=function(){var b=this;b.disabled=true;toast('注册中...');
-  j('/auth/register',{body:{email:'cdn'+Date.now()+'@outlook.com',password:'Cdnu@'+Math.random().toString(36).slice(2,10),nickname:'cdn_user'}}).then(function(d){
-    TOK=(typeof d.token==='string')?d.token:(d.token&&d.token.accessToken)||'';localStorage.setItem('ug_tok',TOK);connected();toast('✅ 新容器就绪');
-  }).catch(function(e){toast(e.message,1)}).then(function(){b.disabled=false});
-};
-$('connBtn').onclick=function(){var t=$('tok').value.trim();if(!t)return toast('先粘贴 token',1);TOK=t;localStorage.setItem('ug_tok',TOK);connected();toast('✅ 已连接')};
-var drop=$('drop');drop.onclick=function(){if(!hasTok())return toast('请先连接容器',1);$('fileIn').click()};
+$('swapBtn').onclick=function(){if(!confirm('更换新容器？（旧文件仍可通过链接访问）'))return;createNew(false)};
+$('connBtn').onclick=function(){var t=$('tok').value.trim();if(!t)return toast('先粘贴 token',1);TOK=t;localStorage.setItem('ug_tok',TOK);CID='manual';localStorage.setItem('ug_cid',CID);TOKT=Date.now();localStorage.setItem('ug_tok_time',String(TOKT));connected();$('connCard').style.display='none';toast('✅ 已连接')};
+$('ava').onclick=function(){$('connCard').style.display=$('connCard').style.display==='none'?'block':'none'};
+var drop=$('drop');drop.onclick=function(){if(!hasTok())return toast('请稍候，容器初始化中',1);$('fileIn').click()};
 $('fileIn').onchange=function(){if($('fileIn').files.length)up($('fileIn').files)};
 function up(files){
   $('qwrap').style.display='block';$('qwrap').innerHTML='';
@@ -155,7 +183,7 @@ function up(files){
   }
   next();
 }
-$('parseBtn').onclick=function(){var u=$('furl').value.trim();if(!u)return toast('输入 URL',1);if(!hasTok())return toast('请先连接容器',1);var b=this;b.disabled=true;toast('解析中...');
+$('parseBtn').onclick=function(){var u=$('furl').value.trim();if(!u)return toast('输入 URL',1);if(!hasTok())return toast('请稍候，容器初始化中',1);var b=this;b.disabled=true;toast('解析中...');
   nativeApi.parse(u,'__pcb');window.__pcb=function(res){
     b.disabled=false;
     try{var d=JSON.parse(res);if(d.error)return toast(d.error,1);PARSED=d.assets||[];$('reslist').innerHTML='';
@@ -180,5 +208,5 @@ $('allBtn').onclick=function(){var L=PARSED.slice(),i=0,b=this;b.disabled=true;
   }
   next();
 };
-if(hasTok())connected();else render();
+autoInit();
 </script></body></html>

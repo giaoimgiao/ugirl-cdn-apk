@@ -8,6 +8,8 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.webkit.JavascriptInterface;
+import android.webkit.ValueCallback;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -28,6 +30,8 @@ import java.util.regex.Pattern;
 
 public class MainActivity extends Activity {
     private WebView webView;
+    private ValueCallback<Uri[]> filePathCallback;
+    private static final int FILE_CHOOSER = 1001;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private static final String API = "https://backend.ugirl.vip/api/v1";
     private static final String UA = "ugirl-cdn-android/2.0";
@@ -42,9 +46,46 @@ public class MainActivity extends Activity {
         s.setAllowFileAccess(true);
         s.setUserAgentString(UA);
         webView.setWebViewClient(new WebViewClient());
+        webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onShowFileChooser(WebView wv, ValueCallback<Uri[]> cb, FileChooserParams params) {
+                if (filePathCallback != null) filePathCallback.onReceiveValue(null);
+                filePathCallback = cb;
+                try {
+                    Intent i = params.createIntent();
+                    i.addCategory(Intent.CATEGORY_OPENABLE);
+                    startActivityForResult(Intent.createChooser(i, "选择文件"), FILE_CHOOSER);
+                } catch (Exception e) {
+                    filePathCallback = null;
+                    return false;
+                }
+                return true;
+            }
+        });
         webView.addJavascriptInterface(new Bridge(), "nativeApi");
         webView.loadUrl("file:///android_asset/index.html");
         setContentView(webView);
+    }
+
+    @Override
+    protected void onActivityResult(int req, int res, Intent data) {
+        if (req == FILE_CHOOSER) {
+            if (filePathCallback == null) return;
+            Uri[] results = null;
+            if (res == Activity.RESULT_OK && data != null) {
+                if (data.getDataString() != null) {
+                    results = new Uri[]{Uri.parse(data.getDataString())};
+                } else if (data.getClipData() != null) {
+                    int n = data.getClipData().getItemCount();
+                    results = new Uri[n];
+                    for (int i = 0; i < n; i++) results[i] = data.getClipData().getItemAt(i).getUri();
+                }
+            }
+            filePathCallback.onReceiveValue(results);
+            filePathCallback = null;
+        } else {
+            super.onActivityResult(req, res, data);
+        }
     }
 
     @Override
