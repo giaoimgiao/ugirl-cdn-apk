@@ -1,0 +1,24 @@
+plugins {
+    id 'com.android.application'
+}
+android {
+    namespace 'com.ugirl.cdn'
+    compileSdk 34
+    defaultConfig {
+        applicationId 'com.ugirl.cdn'
+        minSdk 21
+        targetSdk 34
+        versionCode 200
+        versionName '2.0.0'
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+        encoding 'UTF-8'
+    }
+}

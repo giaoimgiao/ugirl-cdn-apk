@@ -1,0 +1,184 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>UGIRL CDN</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f0e17;color:#e0e0e0;font-family:'Courier New',monospace;min-height:100vh;
+ background-image:linear-gradient(rgba(0,229,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.04) 1px,transparent 1px);
+ background-size:32px 32px}
+header{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:#15162b;border-bottom:2px solid #00e5ff;position:sticky;top:0;z-index:9}
+header .lg{font-size:16px;color:#00e5ff;letter-spacing:2px;font-weight:bold}
+header .lg span{color:#ff2d95}
+header .st{font-size:12px;color:#8b8fa8;letter-spacing:1px}
+header .st b{color:#00e676}
+.wrap{max-width:900px;margin:0 auto;padding:24px 16px 60px;width:100%}
+.card{background:#15162b;border:2px solid #2d2f45;padding:18px;margin-bottom:18px;position:relative}
+.card::before{content:'';position:absolute;top:-2px;left:-2px;width:14px;height:14px;background:#ff2d95}
+.card h3{font-size:14px;color:#00e5ff;letter-spacing:2px;margin-bottom:14px}
+.hint{font-size:11px;color:#8b8fa8;margin-top:10px;line-height:1.8}
+input[type=text],input[type=password]{width:100%;padding:10px 12px;background:#0f0e17;border:2px solid #2d2f45;color:#e0e0e0;font-family:'Courier New',monospace;font-size:13px;margin-bottom:10px;outline:none}
+input:focus{border-color:#00e5ff}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.pb{font-family:'Courier New',monospace;font-size:13px;letter-spacing:1px;padding:8px 16px;background:#00e5ff;color:#0f0e17;border:2px solid #0f0e17;box-shadow:4px 4px 0 #0f0e17;cursor:pointer;margin:4px}
+.pb:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #0f0e17}
+.pb.g{background:#00e676}.pb.y{background:#ffd500}.pb.d{background:#2d2f45;color:#00e5ff}
+.drop{border:3px dashed #2d2f45;padding:30px 20px;text-align:center;color:#8b8fa8;cursor:pointer;background:#0f0e17}
+.drop.over{border-color:#00e5ff;color:#00e5ff}
+#qwrap{display:none;margin-top:14px}
+.qitem{background:#0f0e17;border:2px solid #2d2f45;padding:10px 12px;margin-bottom:8px}
+.qitem .qn{font-size:12px;display:flex;justify-content:space-between;margin-bottom:6px}
+.qitem .pc{color:#ffd500}
+.pbar{height:16px;background:#0f0e17;border:1px solid #2d2f45;overflow:hidden}
+.pbar .fill{height:100%;width:0%;background:repeating-linear-gradient(90deg,#00e5ff 0 10px,#00b8d4 10px 20px);transition:width .15s}
+.folder{background:#0f0e17;border:2px solid #2d2f45;margin-bottom:10px}
+.folder .fh{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer}
+.folder .fh .arr{color:#ffd500;width:16px}
+.folder .fh .nm{font-size:13px;flex:1}
+.folder .fh .meta{color:#565a75;font-size:11px}
+.folder .fb{display:none;border-top:2px solid #2d2f45;padding:6px 12px}
+.folder.open .fb{display:block}
+.folder.open .fh .arr{transform:rotate(90deg)}
+.frow{display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px dashed #23243a;font-size:11px;flex-wrap:wrap}
+.frow .fl{color:#00e5ff;flex:1;min-width:120px;word-break:break-all}
+.mbtn{font-family:'Courier New',monospace;font-size:11px;padding:4px 10px;border:1px solid #2d2f45;cursor:pointer;color:#0f0e17;background:#00e5ff}
+.mbtn.dl{background:#ffd500}.mbtn.del{background:#ff2d95}.mbtn.cp{background:#00e676}
+.res{display:flex;align-items:center;gap:8px;padding:7px 4px;border-bottom:1px dashed #23243a;font-size:11px}
+.res .rt{color:#00e5ff;background:#1a1b33;ppadding:2px 6px;border:1px solid #2d2f45;white-space:nowrap}
+.res .ru{flex:1;color:#8b8fa8;word-break:break-all;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#00e676;color:#0f0e17;padding:10px 26px;font-size:13px;display:none;z-index:99;border:2px solid #0f0e17;box-shadow:4px 4px 0 #0f0e17}
+.toast.err{background:#ff2d95;color:#fff}
+.empty{color:#565a75;font-size:12px;text-align:center;padding:20px}
+</style></head><body>
+<header><div class="lg">UGIRL<span>CDN</span> ▸ 安卓版</div><div class="st">容器: <b id="curSt">未连接</b></div></header>
+<div class="wrap">
+  <div class="card" id="connCard">
+    <h3>连接容器</h3>
+    <div class="row">
+      <button class="pb g" id="regBtn">🆕 一键开新容器</button>
+      <input type="text" id="tok" placeholder="或粘贴 ugirl token" style="flex:1;min-width:160px">
+      <button class="pb" id="connBtn">连接</button>
+    </div>
+    <div class="hint">每个账号 = 独立容器。请求从本机 IP 直发，互不影响。</div>
+  </div>
+  <div class="card">
+    <h3>上传文件</h3>
+    <div class="drop" id="drop"><b style="font-size:18px">⬇ 点击选择文件</b><br><span style="font-size:11px">直接上传到 prod.ugirl.ai CDN</span></div>
+    <input type="file" id="fileIn" multiple hidden>
+    <div id="qwrap"></div>
+  </div>
+  <div class="card">
+    <h3>网页资源提取</h3>
+    <div class="row">
+      <input type="text" id="furl" placeholder="输入网页 URL" style="flex:1;min-width:160px">
+      <button class="pb y" id="parseBtn">解析</button>
+      <button class="pb d" id="allBtn" style="display:none">全部转存</button>
+    </div>
+    <div id="reslist"></div>
+  </div>
+  <div class="card">
+    <h3>我的文件 (<span id="fcount">0</span>)</h3>
+    <div id="flist"><div class="empty">▮ 暂无文件 ▯</div></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+var TOK=localStorage.getItem('ug_tok')||'', IDX=idxLoad(), PARSED=[], __seq=0;
+var $=function(id){return document.getElementById(id)};
+function toast(m,e){var t=$('toast');t.textContent=m;t.className='toast'+(e?' err':'');t.style.display='block';clearTimeout(t._t);t._t=setTimeout(function(){t.style.display='none'},2800)}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'"')}
+function fmtSize(b){if(b==null)return'';if(b<1024)return b+'B';if(b<1048576)return(b/1024).toFixed(1)+'KB';return(b/1048576).toFixed(2)+'MB'}
+function idxLoad(){try{return JSON.parse(localStorage.getItem('ug_idx')||'{}')}catch(e){return{}}}
+function idxSave(){localStorage.setItem('ug_idx',JSON.stringify(IDX))}
+function hasTok(){return !!TOK}
+function j(path,opt){
+  opt=opt||{};
+  return new Promise(function(resolve,reject){
+    var body=opt.body||'', token=opt.token||TOK, method=opt.method||'POST';
+    var cb='__cb'+(++__seq);
+    window[cb]=function(res){
+      delete window[cb];
+      try{var d=JSON.parse(res); if(d&&d.error&&!d.data) reject(new Error(d.error)); else resolve(d);}
+      catch(e){resolve(res);}
+    };
+    nativeApi.post(path, typeof body==='string'?body:JSON.stringify(body), token, method, cb);
+  });
+}
+function connected(){$('curSt').textContent='已连接';$('connCard').style.display='none';render()}
+function render(){
+  var arr=Object.keys(IDX).map(function(fp){var v=IDX[fp];v.fp=fp;return v}).sort(function(a,b){return b.time-a.time});
+  $('fcount').textContent=arr.length;
+  $('flist').innerHTML=arr.length?'':'<div class="empty">▮ 暂无文件 ▯</div>';
+  arr.forEach(function(f){
+    var el=document.createElement('div');el.className='folder';
+    el.innerHTML='<div class="fh"><span class="arr">▶</span><span class="nm">📁 '+esc(f.file||f.fp)+'</span><span class="meta">'+fmtSize(f.size)+'</span></div><div class="fb"><div class="frow"><span class="fl">'+esc(f.url)+'</span><button class="mbtn cp" onclick="copyU(\''+f.fp+'\')">复制</button><button class="mbtn dl" onclick="dlF(\''+f.fp+'\')">下载</button><button class="mbtn del" onclick="delF(\''+f.fp+'\')">删除</button></div></div>';
+    el.querySelector('.fh').onclick=function(){el.classList.toggle('open')};
+    $('flist').appendChild(el);
+  });
+}
+function copyU(fp){navigator.clipboard.writeText(IDX[fp].url).then(function(){toast('✅ 已复制')},function(){toast(IDX[fp].url)})}
+function dlF(fp){toast('下载中...');nativeApi.download(fp,TOK,'__dlcb');window.__dlcb=function(res){try{var d=JSON.parse(res);d.saved?toast('✅ 已保存: '+d.saved.split('/').pop()):toast(d.error,1)}catch(e){toast(res,1)}}}
+function delF(fp){if(!confirm('删除 '+fp+' ?'))return;j('/storage/file',{body:{filePath:fp},method:'DELETE'}).then(function(){delete IDX[fp];idxSave();toast('🗑 已删除');render()}).catch(function(e){toast(e.message,1)})}
+$('regBtn').onclick=function(){var b=this;b.disabled=true;toast('注册中...');
+  j('/auth/register',{body:{email:'cdn'+Date.now()+'@outlook.com',password:'Cdnu@'+Math.random().toString(36).slice(2,10),nickname:'cdn_user'}}).then(function(d){
+    TOK=(typeof d.token==='string')?d.token:(d.token&&d.token.accessToken)||'';localStorage.setItem('ug_tok',TOK);connected();toast('✅ 新容器就绪');
+  }).catch(function(e){toast(e.message,1)}).then(function(){b.disabled=false});
+};
+$('connBtn').onclick=function(){var t=$('tok').value.trim();if(!t)return toast('先粘贴 token',1);TOK=t;localStorage.setItem('ug_tok',TOK);connected();toast('✅ 已连接')};
+var drop=$('drop');drop.onclick=function(){if(!hasTok())return toast('请先连接容器',1);$('fileIn').click()};
+$('fileIn').onchange=function(){if($('fileIn').files.length)up($('fileIn').files)};
+function up(files){
+  $('qwrap').style.display='block';$('qwrap').innerHTML='';
+  var i=0;
+  function next(){
+    if(i>=files.length){setTimeout(function(){$('qwrap').style.display='none'},1600);render();return}
+    var f=files[i++], el=document.createElement('div');el.className='qitem';
+    el.innerHTML='<div class="qn"><span>⬆ '+esc(f.name)+'</span><span class="pc">0%</span></div><div class="pbar"><div class="fill"></div></div>';
+    $('qwrap').appendChild(el);
+    var fill=el.querySelector('.fill'),pc=el.querySelector('.pc');
+    j('/storage/presigned-url',{body:{fileType:'s3',fileName:f.name,fileSize:f.size,contentType:'application/octet-stream',accessLevel:'PUBLIC'}})
+    .then(function(p){
+      var x=new XMLHttpRequest();x.open('PUT',p.data.presignedUrl);
+      x.upload.onprogress=function(e){if(e.lengthComputable){var pct=Math.round(e.loaded/e.total*100);fill.style.width=pct+'%';pc.textContent=pct+'%'}};
+      x.onload=function(){
+        if(x.status<200||x.status>=300)return Promise.reject(new Error('R2 '+x.status));
+        return j('/storage/file-url',{body:{filePath:p.data.filePath}}).then(function(u){
+          IDX[p.data.filePath]={file:f.name,url:u.data.url,size:f.size,time:Date.now()/1000};idxSave();
+          fill.style.width='100%';pc.textContent='✓ 完成';
+        });
+      };
+      x.onerror=function(){pc.textContent='✗ 网络错误';fill.style.background='#ff2d95'};
+      x.send(f);
+      return new Promise(function(res){x.addEventListener('loadend',res)});
+    })
+    .catch(function(e){fill.style.background='#ff2d95';pc.textContent='✗ '+e.message.slice(0,18)})
+    .then(next);
+  }
+  next();
+}
+$('parseBtn').onclick=function(){var u=$('furl').value.trim();if(!u)return toast('输入 URL',1);if(!hasTok())return toast('请先连接容器',1);var b=this;b.disabled=true;toast('解析中...');
+  nativeApi.parse(u,'__pcb');window.__pcb=function(res){
+    b.disabled=false;
+    try{var d=JSON.parse(res);if(d.error)return toast(d.error,1);PARSED=d.assets||[];$('reslist').innerHTML='';
+      if(!PARSED.length){$('reslist').innerHTML='<div class="empty">无资源</div>';$('allBtn').style.display='none';return}
+      PARSED.forEach(function(a,i){var ext=(a.split('?')[0].split('.').pop()||'?').slice(0,4).toUpperCase();
+        var el=document.createElement('div');el.className='res';
+        el.innerHTML='<span class="rt">'+ext+'</span><span class="ru">'+esc(a)+'</span><button class="mbtn cp" onclick="storeOne('+i+')">转存</button>';
+        $('reslist').appendChild(el)});
+      $('allBtn').style.display='inline-block';toast('✅ 提取到 '+PARSED.length+' 个');
+    }catch(e){toast('解析失败',1)}
+  };
+};
+function storeOne(i){var a=PARSED[i];toast('转存中...');
+  nativeApi.store(a,(a.split('/').pop().split('?')[0]||'file.bin').slice(0,60),TOK,'__stcb');
+  window.__stcb=function(res){try{var d=JSON.parse(res);if(d.error)return toast(d.error,1);
+    IDX[d.filePath]={file:d.name,url:d.url,size:d.size,time:Date.now()/1000};idxSave();toast('✅ '+d.url);render()}catch(e){toast('转存失败',1)}};
+}
+$('allBtn').onclick=function(){var L=PARSED.slice(),i=0,b=this;b.disabled=true;
+  function next(){if(i>=L.length){b.disabled=false;toast('✅ 全部完成');render();return}
+    var a=L[i++];nativeApi.store(a,(a.split('/').pop().split('?')[0]||'file.bin').slice(0,60),TOK,'__stcb2');
+    window.__stcb2=function(res){try{var d=JSON.parse(res);if(!d.error){IDX[d.filePath]={file:d.name,url:d.url,size:d.size,time:Date.now()/1000};idxSave()}}catch(e){}next()};
+  }
+  next();
+};
+if(hasTok())connected();else render();
+</script></body></html>
