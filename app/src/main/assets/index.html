@@ -158,28 +158,30 @@ function up(files){
   $('qwrap').style.display='block';$('qwrap').innerHTML='';
   var i=0;
   function next(){
-    if(i>=files.length){setTimeout(function(){$('qwrap').style.display='none'},1600);render();return}
+    if(i>=files.length){render();setTimeout(function(){$('qwrap').style.display='none'},1600);return}
     var f=files[i++], el=document.createElement('div');el.className='qitem';
     el.innerHTML='<div class="qn"><span>⬆ '+esc(f.name)+'</span><span class="pc">0%</span></div><div class="pbar"><div class="fill"></div></div>';
     $('qwrap').appendChild(el);
     var fill=el.querySelector('.fill'),pc=el.querySelector('.pc');
-    j('/storage/presigned-url',{body:{fileType:'s3',fileName:f.name,fileSize:f.size,contentType:'application/octet-stream',accessLevel:'PUBLIC'}})
-    .then(function(p){
-      var x=new XMLHttpRequest();x.open('PUT',p.data.presignedUrl);
-      x.upload.onprogress=function(e){if(e.lengthComputable){var pct=Math.round(e.loaded/e.total*100);fill.style.width=pct+'%';pc.textContent=pct+'%'}};
-      x.onload=function(){
-        if(x.status<200||x.status>=300)return Promise.reject(new Error('R2 '+x.status));
-        return j('/storage/file-url',{body:{filePath:p.data.filePath}}).then(function(u){
-          IDX[p.data.filePath]={file:f.name,url:u.data.url,size:f.size,time:Date.now()/1000};idxSave();
-          fill.style.width='100%';pc.textContent='✓ 完成';
+    (async function(){
+      try{
+        var p=await j('/storage/presigned-url',{body:{fileType:'s3',fileName:f.name,fileSize:f.size,contentType:'application/octet-stream',accessLevel:'PUBLIC'}});
+        await new Promise(function(res,rej){
+          var x=new XMLHttpRequest();x.open('PUT',p.data.presignedUrl);
+          x.upload.onprogress=function(e){if(e.lengthComputable){var pct=Math.round(e.loaded/e.total*100);fill.style.width=pct+'%';pc.textContent=pct+'%'}};
+          x.onload=function(){x.status<200||x.status>=300?rej(new Error('R2 '+x.status)):res()};
+          x.onerror=function(){rej(new Error('网络错误'))};
+          x.send(f);
         });
-      };
-      x.onerror=function(){pc.textContent='✗ 网络错误';fill.style.background='#ff2d95'};
-      x.send(f);
-      return new Promise(function(res){x.addEventListener('loadend',res)});
-    })
-    .catch(function(e){fill.style.background='#ff2d95';pc.textContent='✗ '+e.message.slice(0,18)})
-    .then(next);
+        var u=p.data.fileUrl||p.data.url||'';
+        IDX[p.data.filePath]={file:f.name,url:u,size:f.size,time:Date.now()/1000};
+        idxSave();
+        fill.style.width='100%';pc.textContent='✓ 完成';
+      }catch(e){
+        fill.style.background='#ff2d95';pc.textContent='✗ '+String(e.message||e).slice(0,18);
+      }
+      next();
+    })();
   }
   next();
 }
