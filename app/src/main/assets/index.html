@@ -50,10 +50,20 @@ input:focus{border-color:#00e5ff}
 .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#00e676;color:#0f0e17;padding:10px 26px;font-size:13px;display:none;z-index:99;border:2px solid #0f0e17;box-shadow:4px 4px 0 #0f0e17}
 .toast.err{background:#ff2d95;color:#fff}
 .empty{color:#565a75;font-size:12px;text-align:center;padding:20px}
+.modal{position:fixed;inset:0;background:rgba(15,14,23,.92);display:none;z-index:99;align-items:center;justify-content:center}
+.modal.show{display:flex}
+.modal .box{background:#15162b;border:2px solid #00e5ff;padding:26px;max-width:420px;width:92%;text-align:center;position:relative;box-shadow:8px 8px 0 #ff2d95}
+.modal .box h2{color:#ffd500;font-size:18px;letter-spacing:2px;margin-bottom:10px}
+.modal .box .msg{color:#e0e0e0;font-size:13px;line-height:2;margin-bottom:16px}
+.modal .box .msg b{color:#00e5ff}
+.modal .box img{width:220px;height:220px;image-rendering:pixelated;border:2px solid #2d2f45;background:#fff;margin-bottom:16px}
+.modal .box .tip{color:#565a75;font-size:11px;margin-bottom:14px}
+.modal .box .close{position:absolute;top:-12px;right:-12px;width:32px;height:32px;background:#ff2d95;color:#fff;border:2px solid #0f0e17;cursor:pointer;font-size:16px;line-height:28px}
 </style></head><body>
 <header>
   <div class="lg">UGIRL<span>CDN</span> ▸ 存储</div>
   <div class="st">
+    <button class="pb sm y" id="sponsorBtn" style="margin-right:8px">❤ 赞助</button>
     <span class="avatar" id="ava">?</span>
     <span id="cidTxt">初始化</span>
     <span id="expTxt" style="font-size:10px;color:#565a75"></span>
@@ -89,6 +99,16 @@ input:focus{border-color:#00e5ff}
   </div>
 </div>
 <div class="toast" id="toast"></div>
+<div class="modal" id="sponsorModal">
+  <div class="box">
+    <button class="close" onclick="closeSponsor()">✕</button>
+    <h2>☕ 赞助我们</h2>
+    <div class="msg"><b>公益免费 · 不限速云存储</b><br>如果喜欢的话，就赞助一下吧 ❤</div>
+    <img src="sponsor_qr.png" alt="赞助码" onclick="openAlipay()">
+    <div class="tip">👆 长按/点击二维码 · 或点击下方按钮打开支付宝</div>
+    <button class="pb g" onclick="openAlipay()" style="width:100%">💰 打开支付宝赞助</button>
+  </div>
+</div>
 <script>
 var TOK=localStorage.getItem('ug_tok')||'', CID=localStorage.getItem('ug_cid')||'';
 var TOKT=parseInt(localStorage.getItem('ug_tok_time')||'0');
@@ -210,5 +230,9 @@ $('allBtn').onclick=function(){var L=PARSED.slice(),i=0,b=this;b.disabled=true;
   }
   next();
 };
+function closeSponsor(){$('sponsorModal').classList.remove('show')}
+function openAlipay(){nativeApi.openBrowser('https://qr.alipay.com/fkx14591ue6tjaa6zhwaa7c')}
+$('sponsorBtn').onclick=function(){$('sponsorModal').classList.add('show')};
+$('sponsorModal').onclick=function(e){if(e.target===this)closeSponsor()};
 autoInit();
 </script></body></html>
